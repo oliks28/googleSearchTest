@@ -7,7 +7,9 @@ Feature: Google Search Function
     Given I am on the google.co.uk search page using chrome browser
     And I search for the searchterm "<searchterm>" in the search box field
     Then I verify and report that the expected site "<expectedsite>" is on the first page of results
-# Parameters for the test are contained in the Example table
+    Then I close my browser
+
+    # Parameters for the test are contained in the Example table
     Examples: 
-      | searchterm | expectedsite                       |
-      | insurance  | http://www.moneysupermarket.com/insurance/|
+      | searchterm | expectedsite                               |
+      | insurance  | http://www.moneysupermarket.com/insurance/ |

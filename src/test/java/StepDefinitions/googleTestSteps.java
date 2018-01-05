@@ -53,6 +53,8 @@ public class googleTestSteps extends TestBase {
 		String Gotexpectedsite = "";
 		boolean isFound = false;
 		while (!isFound) {
+			
+			
 			List<WebElement> res = driver.findElements(By.xpath("//div[@class='_NId']//h3/a"));
 			for (int i = 0; i < res.size(); i++) {
 				String values = res.get(i).getText();
@@ -60,22 +62,37 @@ public class googleTestSteps extends TestBase {
 				System.out.println(values);
 				if (href.contains(expectedsite)) {
 					System.out.println("It is on the first page");
-					System.out.println(
-							String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
+					//System.out.println(
+							//String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
 					isFound = true;
-					break;
+					//break;
 				}
 			}
+			if(isFound==true){
+				break;
+			}
+				else{
+			
 			pageNo = pageNo + 1;
 			Thread.sleep(3000);
+				}
 			
 			driver.findElement(By.xpath("//*[@id='pnnext']/span[2]")).click();
 			
 		}
+		System.out.println(
+				String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
+	}
+	
+	@Then("^I close my browser$")
+	public void i_close_my_browser() throws Throwable {
+	    driver.close();
 	}
 
-	@After
-	public void quit() {
-		driver.close();
-	}
+
+//	@After
+//	public void quit() {
+//		driver.quit();
+//	}
 }
+  
