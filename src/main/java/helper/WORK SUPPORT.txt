@@ -1,0 +1,997 @@
+Test Base Class
+
+package helper;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+
+public class TestBase {
+	
+	public static Properties CONFIG = null;
+	public static Properties OR = null;
+	public static WebDriver driver;
+	public static FileInputStream fis;
+	public static Logger log = Logger.getLogger("devpinoyLogger");
+	public static ExcelReader excel= new ExcelReader(System.getProperty("user.dir") + "\\src\\test\\resources\\excel\\testdata.xlsx");
+	public static WebDriverWait wait;
+	
+	
+    public void initialize() throws IOException{
+    	
+    	if(driver==null){
+	
+    	CONFIG=new Properties();
+    	//user might need to add the exact location of their config.properties file as this path might be different
+    	FileInputStream fi= new FileInputStream(System.getProperty("user.dir")+"\\src\\main\\java\\helper\\config.properties");
+    	CONFIG.load(fi);
+    	
+    	
+    	
+    	if(CONFIG.getProperty("browser").equalsIgnoreCase("chrome")){
+    		//user will need to specify the location of their chrome driver to run this
+    		System.setProperty("webdriver.chrome.driver",
+    				"C:\\Users\\kenad\\Downloads\\chromedriver_win32 (1)\\chromedriver.exe");
+    		driver=new ChromeDriver();
+    		
+    	}else if(CONFIG.getProperty("browser").equalsIgnoreCase("firefox")){
+    		driver = new FirefoxDriver();
+    		
+    	}else if(CONFIG.getProperty("browser").equalsIgnoreCase("IE")){
+    		driver = new InternetExplorerDriver();
+    	}
+    	
+    	driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
+	
+	
+}
+	
+    }
+
+public boolean isElementPresent(By by){
+		
+		try{
+			
+			driver.findElement(by);
+			return true;
+			
+		}catch(NoSuchElementException e){
+			
+			return false;
+			
+		}
+	}
+	
+	@AfterSuite
+	public void tearDown() throws InterruptedException{
+		
+		Thread.sleep(2000);
+		driver.quit();
+		
+		
+		}
+
+	}
+	
+		
+	
+	
+
+
+
+
+SAMPLE PAGE CLASS FOR PAGE OBJECTS
+
+package Pages;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.How;
+import org.openqa.selenium.support.ui.Select;
+
+import helper.Reusable;
+import junit.framework.Assert;
+
+public class RegistrationPage {
+	
+	WebDriver driver;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='name_3_firstname']")
+	public WebElement Regfirstname;
+	
+	@FindBy(how=How.XPATH,using="//*[text()='Registration']")
+	public WebElement RegistrationTitle;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='name_3_lastname']")
+	public WebElement Reglastname;
+	
+	@FindBy(how=How.XPATH,using="//input[@value='single']")
+	public WebElement RegMarStatusButton;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='pie_register']/li[3]/div/div/input[1]")
+	public WebElement RegHobbyCheckbox;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='dropdown_7']")
+	public WebElement RegCountryDropdown;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='mm_date_8']")
+	public WebElement RegMonthOfBirth;
+	
+	@FindBy(how=How.ID,using="dd_date_8")
+	public WebElement RegDayOfBirth;
+	
+	@FindBy(how=How.XPATH,using="//*[@id='yy_date_8']")
+	public WebElement RegYearOfBirth;
+	
+	
+	public void verifyTitle(){
+		
+		String title = RegistrationTitle.getText();
+		Assert.assertEquals("Registration",title );
+	}
+	
+	public void enterfirstname(String firsName){
+		
+		Regfirstname.sendKeys(firsName);
+	}
+	
+	public void enterlastname(String lasName){
+		
+		Reglastname.sendKeys(lasName);
+	}
+	
+	public void clickMaritalStatus(){
+		RegMarStatusButton.click();
+	}
+	
+	public void clickRegHobby(){
+		
+		RegHobbyCheckbox.click();
+	}
+	
+	public void enterCountryOfResidence(String locatorvalue){
+		
+		//Select s = new Select(RegCountryDropdown);
+		//s.selectByVisibleText("United Kingdom");
+		Reusable.dropdown(RegCountryDropdown, locatorvalue);
+		
+	}
+	
+   public void enterMonthOfBirth(String locatorvalue){
+		
+		//Select s = new Select(RegDateOfBirth);
+		//s.selectByVisibleText("10");
+		Reusable.dropdown(RegMonthOfBirth, locatorvalue);
+	}
+   public void enterDayOfBirth(String locatorvalue){
+		
+		//Select s = new Select(RegDateOfBirth);
+		//s.selectByVisibleText("10");
+		Reusable.dropdown(RegDayOfBirth, locatorvalue);
+		
+   }
+   
+   public void enterYearOfBirth(String locatorvalue){
+		
+		//Select s = new Select(RegDateOfBirth);
+		//s.selectByVisibleText("10");
+		Reusable.dropdown(RegYearOfBirth, locatorvalue);
+   
+   }
+   
+}
+
+
+SAMPLE CUCUMBER RUNNER CLASS
+
+@RunWith(Cucumber.class)
+@CucumberOptions(strict=false,features = {"src/test/resources"},glue={"StepDefinitions"},monochrome=true, 
+format = {"json:target/cucumber.json",
+"html:target/site/cucumber-pretty"}, tags = { "~@ignore" })
+
+public class RunnerTest {
+
+}
+
+
+
+SAMPLE STEP DEFINITION FILE
+
+public class googleTestSteps extends TestBase {
+
+	@Before
+	// I have created a TestBase class in the helper package and i have used
+	// class inheritance to inherit functions and webdriver instances
+	public void setup() throws IOException {
+		initialize();
+	}
+
+	@Given("^I am on the google\\.co\\.uk search page using chrome browser$")
+	public void i_am_on_the_google_co_uk_search_page_using_chrome_browser() throws Throwable {
+		// the testsiteName could be obtained from the config.properties file
+		driver.get(CONFIG.getProperty("testsiteName"));
+
+	}
+
+	@Given("^I search for the searchterm \"([^\"]*)\" in the search box field$")
+	public void i_search_for_the_searchterm_in_the_search_box_field(String searchterm) throws Throwable {
+		// I have used page object design pattern to abstract functions in this
+		// test.Page is in the src/test/java folder
+		GoogleHomePage ghp = PageFactory.initElements(driver, GoogleHomePage.class);
+		ghp.enterSearchItem(searchterm);
+	}
+
+	@Then("^I verify and report that the expected site \"([^\"]*)\" is on the first page of results$")
+	public void i_verify_and_report_that_the_expected_site_is_on_the_first_page_of_results(String expectedsite)
+			throws Throwable {
+		int pageNo = 1;
+		String Gotexpectedsite = "";
+		boolean isFound = false;
+		while (isFound==false) {
+			
+			
+			List<WebElement> res = driver.findElements(By.xpath("//div[@class='_NId']//h3/a"));
+			for (int i = 0; i < res.size(); i++) {
+				String values = res.get(i).getText();
+				String href = res.get(i).getAttribute("href");
+				System.out.println(values);
+				if (href.contains(expectedsite)) {
+					System.out.println("It is on the first page");
+					Gotexpectedsite=href;
+					//System.out.println(
+							//String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
+					isFound = true;
+					break;
+				}
+			}
+			if(isFound==true){
+				break;
+			}
+				else{
+			
+			pageNo = pageNo + 1;
+			Thread.sleep(3000);
+				}
+			
+			driver.findElement(By.xpath("//*[@id='pnnext']/span[2]")).click();
+			
+		}
+		System.out.println(
+				String.format("Expected site is found on Page Number %d - %s", pageNo, Gotexpectedsite));
+	}
+	
+	@Then("^I close my browser$")
+	public void i_close_my_browser() throws Throwable {
+	    driver.close();
+	}
+
+
+
+}
+
+
+
+CUSTOM LISTENERS
+
+public class CustomListeners implements ITestListener{
+
+	public void onTestStart(ITestResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onTestSuccess(ITestResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onTestFailure(ITestResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onTestSkipped(ITestResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStart(ITestContext context) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onFinish(ITestContext context) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+
+}
+
+
+     SAMPLE EXCEL READER UTILITY
+
+
+package utilities;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCreationHelper;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class ExcelReader {
+	
+	public  String path;
+	public  FileInputStream fis = null;
+	public  FileOutputStream fileOut =null;
+	private XSSFWorkbook workbook = null;
+	private XSSFSheet sheet = null;
+	private XSSFRow row   =null;
+	private XSSFCell cell = null;
+	
+	public ExcelReader(String path) {
+		
+		this.path=path;
+		try {
+			fis = new FileInputStream(path);
+			workbook = new XSSFWorkbook(fis);
+			sheet = workbook.getSheetAt(0);
+			fis.close();
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		} 
+		
+	}
+	
+	
+	// returns the row count in a sheet
+	public int getRowCount(String sheetName){
+		int index = workbook.getSheetIndex(sheetName);
+		if(index==-1)
+			return 0;
+		else{
+		sheet = workbook.getSheetAt(index);
+		int number=sheet.getLastRowNum()+1;
+		return number;
+		}
+		
+	}
+	
+	
+	
+	// returns the data from a cell
+	public String getCellData(String sheetName,String colName,int rowNum){
+		try{
+			if(rowNum <=0)
+				return "";
+		
+		int index = workbook.getSheetIndex(sheetName);
+		int col_Num=-1;
+		if(index==-1)
+			return "";
+		
+		sheet = workbook.getSheetAt(index);
+		row=sheet.getRow(0);
+		for(int i=0;i<row.getLastCellNum();i++){
+			//System.out.println(row.getCell(i).getStringCellValue().trim());
+			if(row.getCell(i).getStringCellValue().trim().equals(colName.trim()))
+				col_Num=i;
+		}
+		if(col_Num==-1)
+			return "";
+		
+		sheet = workbook.getSheetAt(index);
+		row = sheet.getRow(rowNum-1);
+		if(row==null)
+			return "";
+		cell = row.getCell(col_Num);
+		
+		if(cell==null)
+			return "";
+		
+		if(cell.getCellType()==Cell.CELL_TYPE_STRING)
+			  return cell.getStringCellValue();
+		else if(cell.getCellType()==Cell.CELL_TYPE_NUMERIC || cell.getCellType()==Cell.CELL_TYPE_FORMULA ){
+			  
+			  String cellText  = String.valueOf(cell.getNumericCellValue());
+			  if (HSSFDateUtil.isCellDateFormatted(cell)) {
+		           
+				  double d = cell.getNumericCellValue();
+
+				  Calendar cal =Calendar.getInstance();
+				  cal.setTime(HSSFDateUtil.getJavaDate(d));
+		            cellText =
+		             (String.valueOf(cal.get(Calendar.YEAR))).substring(2);
+		           cellText = cal.get(Calendar.DAY_OF_MONTH) + "/" +
+		                      cal.get(Calendar.MONTH)+1 + "/" + 
+		                      cellText;
+		           
+		          
+
+		         }
+
+			  
+			  
+			  return cellText;
+		  }else if(cell.getCellType()==Cell.CELL_TYPE_BLANK)
+		      return ""; 
+		  else 
+			  return String.valueOf(cell.getBooleanCellValue());
+		
+		}
+		catch(Exception e){
+			
+			e.printStackTrace();
+			return "row "+rowNum+" or column "+colName +" does not exist in xls";
+		}
+	}
+	
+	
+	
+	// returns the data from a cell
+	public String getCellData(String sheetName,int colNum,int rowNum){
+		try{
+			if(rowNum <=0)
+				return "";
+		
+		int index = workbook.getSheetIndex(sheetName);
+
+		if(index==-1)
+			return "";
+		
+	
+		sheet = workbook.getSheetAt(index);
+		row = sheet.getRow(rowNum-1);
+		if(row==null)
+			return "";
+		cell = row.getCell(colNum);
+		if(cell==null)
+			return "";
+		
+	  if(cell.getCellType()==Cell.CELL_TYPE_STRING)
+		  return cell.getStringCellValue();
+	  else if(cell.getCellType()==Cell.CELL_TYPE_NUMERIC || cell.getCellType()==Cell.CELL_TYPE_FORMULA ){
+		  
+		  String cellText  = String.valueOf(cell.getNumericCellValue());
+		  if (HSSFDateUtil.isCellDateFormatted(cell)) {
+	           // format in form of M/D/YY
+			  double d = cell.getNumericCellValue();
+
+			  Calendar cal =Calendar.getInstance();
+			  cal.setTime(HSSFDateUtil.getJavaDate(d));
+	            cellText =
+	             (String.valueOf(cal.get(Calendar.YEAR))).substring(2);
+	           cellText = cal.get(Calendar.MONTH)+1 + "/" +
+	                      cal.get(Calendar.DAY_OF_MONTH) + "/" +
+	                      cellText;
+	           
+	         
+
+	         }
+
+		  
+		  
+		  return cellText;
+	  }else if(cell.getCellType()==Cell.CELL_TYPE_BLANK)
+	      return "";
+	  else 
+		  return String.valueOf(cell.getBooleanCellValue());
+		}
+		catch(Exception e){
+			
+			e.printStackTrace();
+			return "row "+rowNum+" or column "+colNum +" does not exist  in xls";
+		}
+	}
+	
+	
+	
+	
+	// returns true if data is set successfully else false
+	public boolean setCellData(String sheetName,String colName,int rowNum, String data){
+		try{
+		fis = new FileInputStream(path); 
+		workbook = new XSSFWorkbook(fis);
+
+		if(rowNum<=0)
+			return false;
+		
+		int index = workbook.getSheetIndex(sheetName);
+		int colNum=-1;
+		if(index==-1)
+			return false;
+		
+		
+		sheet = workbook.getSheetAt(index);
+		
+
+		row=sheet.getRow(0);
+		for(int i=0;i<row.getLastCellNum();i++){
+			//System.out.println(row.getCell(i).getStringCellValue().trim());
+			if(row.getCell(i).getStringCellValue().trim().equals(colName))
+				colNum=i;
+		}
+		if(colNum==-1)
+			return false;
+
+		sheet.autoSizeColumn(colNum); 
+		row = sheet.getRow(rowNum-1);
+		if (row == null)
+			row = sheet.createRow(rowNum-1);
+		
+		cell = row.getCell(colNum);	
+		if (cell == null)
+	        cell = row.createCell(colNum);
+
+	    
+	    cell.setCellValue(data);
+
+	    fileOut = new FileOutputStream(path);
+
+		workbook.write(fileOut);
+
+	    fileOut.close();	
+
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	
+	
+	// returns true if data is set successfully else false
+	public boolean setCellData(String sheetName,String colName,int rowNum, String data,String url){
+		
+		try{
+		fis = new FileInputStream(path); 
+		workbook = new XSSFWorkbook(fis);
+
+		if(rowNum<=0)
+			return false;
+		
+		int index = workbook.getSheetIndex(sheetName);
+		int colNum=-1;
+		if(index==-1)
+			return false;
+		
+		
+		sheet = workbook.getSheetAt(index);
+		
+		row=sheet.getRow(0);
+		for(int i=0;i<row.getLastCellNum();i++){
+			
+			if(row.getCell(i).getStringCellValue().trim().equalsIgnoreCase(colName))
+				colNum=i;
+		}
+		
+		if(colNum==-1)
+			return false;
+		sheet.autoSizeColumn(colNum); 
+		row = sheet.getRow(rowNum-1);
+		if (row == null)
+			row = sheet.createRow(rowNum-1);
+		
+		cell = row.getCell(colNum);	
+		if (cell == null)
+	        cell = row.createCell(colNum);
+			
+	    cell.setCellValue(data);
+	    XSSFCreationHelper createHelper = workbook.getCreationHelper();
+
+	    //cell style for hyperlinks
+	    
+	    CellStyle hlink_style = workbook.createCellStyle();
+	    XSSFFont hlink_font = workbook.createFont();
+	    hlink_font.setUnderline(XSSFFont.U_SINGLE);
+	    hlink_font.setColor(IndexedColors.BLUE.getIndex());
+	    hlink_style.setFont(hlink_font);
+	    //hlink_style.setWrapText(true);
+
+	    XSSFHyperlink link = createHelper.createHyperlink(XSSFHyperlink.LINK_FILE);
+	    link.setAddress(url);
+	    cell.setHyperlink(link);
+	    cell.setCellStyle(hlink_style);
+	      
+	    fileOut = new FileOutputStream(path);
+		workbook.write(fileOut);
+
+	    fileOut.close();	
+
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	
+	
+	// returns true if sheet is created successfully else false
+	public boolean addSheet(String  sheetname){		
+		
+		FileOutputStream fileOut;
+		try {
+			 workbook.createSheet(sheetname);	
+			 fileOut = new FileOutputStream(path);
+			 workbook.write(fileOut);
+		     fileOut.close();		    
+		} catch (Exception e) {			
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	// returns true if sheet is removed successfully else false if sheet does not exist
+	public boolean removeSheet(String sheetName){		
+		int index = workbook.getSheetIndex(sheetName);
+		if(index==-1)
+			return false;
+		
+		FileOutputStream fileOut;
+		try {
+			workbook.removeSheetAt(index);
+			fileOut = new FileOutputStream(path);
+			workbook.write(fileOut);
+		    fileOut.close();		    
+		} catch (Exception e) {			
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	// returns true if column is created successfully
+	public boolean addColumn(String sheetName,String colName){
+		
+		
+		try{				
+			fis = new FileInputStream(path); 
+			workbook = new XSSFWorkbook(fis);
+			int index = workbook.getSheetIndex(sheetName);
+			if(index==-1)
+				return false;
+			
+		XSSFCellStyle style = workbook.createCellStyle();
+		style.setFillForegroundColor(HSSFColor.GREY_40_PERCENT.index);
+		style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+		
+		sheet=workbook.getSheetAt(index);
+		
+		row = sheet.getRow(0);
+		if (row == null)
+			row = sheet.createRow(0);
+		
+		
+		if(row.getLastCellNum() == -1)
+			cell = row.createCell(0);
+		else
+			cell = row.createCell(row.getLastCellNum());
+	        
+	        cell.setCellValue(colName);
+	        cell.setCellStyle(style);
+	        
+	        fileOut = new FileOutputStream(path);
+			workbook.write(fileOut);
+		    fileOut.close();		    
+
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
+		
+		
+	}
+	
+	
+	
+	// removes a column and all the contents
+	public boolean removeColumn(String sheetName, int colNum) {
+		try{
+		if(!isSheetExist(sheetName))
+			return false;
+		fis = new FileInputStream(path); 
+		workbook = new XSSFWorkbook(fis);
+		sheet=workbook.getSheet(sheetName);
+		XSSFCellStyle style = workbook.createCellStyle();
+		style.setFillForegroundColor(HSSFColor.GREY_40_PERCENT.index);
+		XSSFCreationHelper createHelper = workbook.getCreationHelper();
+		style.setFillPattern(HSSFCellStyle.NO_FILL);
+		
+	    
+	
+		for(int i =0;i<getRowCount(sheetName);i++){
+			row=sheet.getRow(i);	
+			if(row!=null){
+				cell=row.getCell(colNum);
+				if(cell!=null){
+					cell.setCellStyle(style);
+					row.removeCell(cell);
+				}
+			}
+		}
+		fileOut = new FileOutputStream(path);
+		workbook.write(fileOut);
+	    fileOut.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+		
+	}
+	
+	
+  // find whether sheets exists	
+	public boolean isSheetExist(String sheetName){
+		int index = workbook.getSheetIndex(sheetName);
+		if(index==-1){
+			index=workbook.getSheetIndex(sheetName.toUpperCase());
+				if(index==-1)
+					return false;
+				else
+					return true;
+		}
+		else
+			return true;
+	}
+	
+	
+	// returns number of columns in a sheet	
+	public int getColumnCount(String sheetName){
+		// check if sheet exists
+		if(!isSheetExist(sheetName))
+		 return -1;
+		
+		sheet = workbook.getSheet(sheetName);
+		row = sheet.getRow(0);
+		
+		if(row==null)
+			return -1;
+		
+		return row.getLastCellNum();
+		
+		
+		
+	}
+	
+	
+	//String sheetName, String testCaseName,String keyword ,String URL,String message
+	public boolean addHyperLink(String sheetName,String screenShotColName,String testCaseName,int index,String url,String message){
+		
+		
+		url=url.replace('\\', '/');
+		if(!isSheetExist(sheetName))
+			 return false;
+		
+	    sheet = workbook.getSheet(sheetName);
+	    
+	    for(int i=2;i<=getRowCount(sheetName);i++){
+	    	if(getCellData(sheetName, 0, i).equalsIgnoreCase(testCaseName)){
+	    		
+	    		setCellData(sheetName, screenShotColName, i+index, message,url);
+	    		break;
+	    	}
+	    }
+
+
+		return true; 
+	}
+	public int getCellRowNum(String sheetName,String colName,String cellValue){
+		
+		for(int i=2;i<=getRowCount(sheetName);i++){
+	    	if(getCellData(sheetName,colName , i).equalsIgnoreCase(cellValue)){
+	    		return i;
+	    	}
+	    }
+		return -1;
+		
+	}
+		
+	
+	// to run this on stand alone
+	public static void main(String arg[]) throws IOException{
+		
+		
+		ExcelReader datatable = null;
+		
+
+			 datatable = new ExcelReader("C:\\CM3.0\\app\\test\\Framework\\AutomationBvt\\src\\config\\xlfiles\\Controller.xlsx");
+				for(int col=0 ;col< datatable.getColumnCount("TC5"); col++){
+					System.out.println(datatable.getCellData("TC5", col, 1));
+				}
+	}
+	
+
+}
+
+
+
+SAMPLE LOG4J FILE
+
+#Root logger option
+log4j.rootLogger=debug,file
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=C:\\Users\\kenad\\workspace\\Datadrivenframewor\\src\\test\\resources\\logs\\Selenium.log
+log4j.appender.file.maxFileSize=5000KB
+log4j.appender.file.maxBackupIndex=1
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{ABSOLUTE} %5p %c{1}:%L - %m%n
+#do not append the old file. Create a new log file everytime
+log4j.appender.file.Append=false
+
+
+
+#Application Logs
+log4j.logger.devpinoyLogger=DEBUG, dest1
+log4j.appender.dest1=org.apache.log4j.RollingFileAppender
+log4j.appender.dest1.maxFileSize=5000KB
+log4j.appender.dest1.maxBackupIndex=3
+log4j.appender.dest1.layout=org.apache.log4j.PatternLayout
+log4j.appender.dest1.layout.ConversionPattern=%d{dd/MM/yyyy HH:mm:ss} %c %m%n
+log4j.appender.dest1.File=C:\\Users\\kenad\\workspace\\Datadrivenframewor\\src\\test\\resources\\logs\\Appplication.log
+#do not append the old file. Create a new log file everytime
+log4j.appender.dest1.Append=false
+
+
+
+SAMPLE CUCUMBER POM.XML FILE
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.googlesearch.functions</groupId>
+  <artifactId>com.googlesearchtest.test</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>com.googlesearchtest.test</name>
+  <url>http://maven.apache.org</url>
+
+  <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>net.masterthought</groupId>
+                <artifactId>maven-cucumber-reporting</artifactId>
+                <version>2.8.0</version>
+                <executions>
+                    <execution>
+                        <id>execution</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <projectName>com.googlesearchtest.test</projectName>
+                            <outputDirectory>${project.build.directory}/site/cucumber-report-html</outputDirectory>
+                            <cucumberOutput>${project.build.directory}/cucumber.json</cucumberOutput>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+  <dependencies>
+<!-- https://mvnrepository.com/artifact/junit/junit -->
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+</dependency>
+<dependency>
+    <groupId>com.vimalselvam</groupId>
+    <artifactId>cucumber-extentsreport</artifactId>
+    <version>2.0.4</version>
+</dependency>
+<!-- pom.xml -->
+<dependency>
+    <groupId>com.aventstack</groupId>
+    <artifactId>extentreports</artifactId>
+    <version>3.1.2</version>
+</dependency>
+<dependency>
+    <groupId>com.relevantcodes</groupId>
+    <artifactId>extentreports</artifactId>
+    <version>2.41.2</version>
+</dependency>
+<dependency>
+    <groupId>org.freemarker</groupId>
+    <artifactId>freemarker</artifactId>
+    <version>2.3.22</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>3.0.1</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/info.cukes/cucumber-java -->
+<dependency>
+    <groupId>info.cukes</groupId>
+    <artifactId>cucumber-java</artifactId>
+    <version>1.2.5</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/info.cukes/cucumber-junit -->
+<dependency>
+    <groupId>info.cukes</groupId>
+    <artifactId>cucumber-junit</artifactId>
+    <version>1.2.5</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/info.cukes/cucumber-picocontainer -->
+<dependency>
+    <groupId>info.cukes</groupId>
+    <artifactId>cucumber-picocontainer</artifactId>
+    <version>1.2.5</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/info.cukes/gherkin -->
+<dependency>
+    <groupId>info.cukes</groupId>
+    <artifactId>gherkin</artifactId>
+    <version>2.12.2</version>
+</dependency>
+  </dependencies>
+</project>
+
+
+GITHUB MAVEN PROJECT LOCATION
+
+https://github.com/oliks28/googleSearchTest
+
+
+
+
+
+
+
+

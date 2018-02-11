@@ -23,5 +23,14 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/kenad/.m2/repository/com/vimalselvam/cucumber-extentsreport/2.0.4/cucumber-extentsreport-2.0.4.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="com.vimalselvam"/>
+			<attribute name="maven.artifactId" value="cucumber-extentsreport"/>
+			<attribute name="maven.version" value="2.0.4"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

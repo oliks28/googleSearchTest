@@ -52,7 +52,7 @@ public class googleTestSteps extends TestBase {
 		int pageNo = 1;
 		String Gotexpectedsite = "";
 		boolean isFound = false;
-		while (!isFound) {
+		while (isFound==false) {
 			
 			
 			List<WebElement> res = driver.findElements(By.xpath("//div[@class='_NId']//h3/a"));
@@ -62,10 +62,11 @@ public class googleTestSteps extends TestBase {
 				System.out.println(values);
 				if (href.contains(expectedsite)) {
 					System.out.println("It is on the first page");
+					Gotexpectedsite=href;
 					//System.out.println(
 							//String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
 					isFound = true;
-					//break;
+					break;
 				}
 			}
 			if(isFound==true){
@@ -81,7 +82,7 @@ public class googleTestSteps extends TestBase {
 			
 		}
 		System.out.println(
-				String.format("Expected site is found on Page Number %d", pageNo, Gotexpectedsite));
+				String.format("Expected site is found on Page Number %d - %s", pageNo, Gotexpectedsite));
 	}
 	
 	@Then("^I close my browser$")

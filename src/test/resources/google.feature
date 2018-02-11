@@ -12,4 +12,4 @@ Feature: Google Search Function
     # Parameters for the test are contained in the Example table
     Examples: 
       | searchterm | expectedsite                               |
-      | insurance  | http://www.moneysupermarket.com/insurance/ |
+      |insurance | http://www.moneysupermarket.com/insurance/ |
